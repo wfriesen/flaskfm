@@ -1,4 +1,4 @@
-CREATE TABLE scrobbles (
+CREATE TABLE scrobble (
   id SERIAL PRIMARY KEY
 , artist TEXT
 , album TEXT
@@ -6,4 +6,4 @@ CREATE TABLE scrobbles (
 , scrobble_timestamp TIMESTAMPTZ
 );
 
-COPY scrobbles(artist, album, track, scrobble_timestamp) FROM '/dataimport/scrobbles.csv' DELIMITER ',' CSV;
+COPY scrobble(artist, album, track, scrobble_timestamp) FROM '/dataimport/scrobbles.csv' DELIMITER ',' CSV;

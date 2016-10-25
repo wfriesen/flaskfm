@@ -8,3 +8,10 @@ services:
       POSTGRES_USER: docker
     ports:
      - 5432:5432
+  web:
+    build: web
+    command: python /code/app.py
+    ports:
+      - 5000:5000
+    depends_on:
+      - db
