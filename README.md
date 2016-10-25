@@ -10,4 +10,4 @@ A last.fm clone using [Flask](http://flask.pocoo.org/)
 Follow these steps to run the flask app outside of docker.
 - Repoint the database host name: `export POSTGRES_URI=postgresql://docker:docker@localhost/docker`
 - Start up the database: `docker-compose up db`
-- Run the local server in `./web` with `python app.py`
+- Run the local server in `./api` with `python app.py`
