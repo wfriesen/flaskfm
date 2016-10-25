@@ -10,16 +10,10 @@ db = SQLAlchemy(app)
 
 class Scrobble(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    artist = db.Column(db.String(1000))
-    album = db.Column(db.String(1000))
-    track = db.Column(db.String(1000))
+    artist = db.Column(db.Text)
+    album = db.Column(db.Text)
+    track = db.Column(db.Text)
     scrobble_timestamp = db.Column(db.DateTime(timezone=True))
-
-    def __init__(self, artist, album, track, scrobble_timestamp):
-        self.artist = artist
-        self.album = album
-        self.track = track
-        self.scrobble_timestamp = scrobble_timestamp
 
 
 @app.route('/flaskfm/api/v0.1/recent', methods=['GET'])
