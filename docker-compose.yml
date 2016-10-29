@@ -15,3 +15,9 @@ services:
       - 5000:5000
     depends_on:
       - db
+  web:
+    image: nginx
+    ports:
+      - 80:80
+    volumes:
+      - ./web:/usr/share/nginx/html
