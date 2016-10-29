@@ -4,7 +4,7 @@ function get_recent_scrobbles() {
     $.each(data.scrobbles, function(index, item) {
       console.log(this.timestamp);
       html +=
-        '<div class="item">' +
+        '<div class="ui segment" id="recent-scrobble-' + this.id + '">' +
         this.artist + ' - ' + this.track + ' [' + this.album + ']' +
         '<span title="' + this.timestamp + '"> (' + this.human_timestamp + ')</span>' +
         '</div>';
