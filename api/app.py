@@ -1,6 +1,6 @@
 #!flaskfm/bin/python
 from datetime import datetime
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from humanize import naturaltime
 from psycopg2 import tz
@@ -20,6 +20,23 @@ class Scrobble(db.Model):
     album = db.Column(db.Text)
     track = db.Column(db.Text)
     scrobble_timestamp = db.Column(db.DateTime(timezone=True))
+
+
+@app.route(
+    '/flaskfm/api/v0.1/delete_scrobble/<int:id>',
+    methods=['DELETE', 'OPTIONS']
+)
+@crossdomain(origin='*')
+def delete_scrobble(id):
+    if request.method == 'OPTIONS':
+        return jsonify({'response': 'All good'})
+    scrobble = Scrobble.query.filter_by(id=id)
+    if scrobble.count() == 0:
+        return jsonify({'errors': {'message': 'Scrobble does not exist'}})
+
+    scrobble.delete()
+    db.session.commit()
+    return jsonify({'success': {'message': 'Deleted scrobble ID: %d' % (id)}})
 
 
 @app.route('/flaskfm/api/v0.1/recent', methods=['GET'])
