@@ -3,6 +3,7 @@ from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import text
 
+from crossdomain import crossdomain
 from secrets import database_uri
 
 app = Flask(__name__)
@@ -19,11 +20,13 @@ class Scrobble(db.Model):
 
 
 @app.route('/flaskfm/api/v0.1/recent', methods=['GET'])
+@crossdomain(origin='*')
 def recent_scrobbles():
     scrobbles = Scrobble.query.order_by(
         Scrobble.scrobble_timestamp.desc()
     ).limit(10)
     scrobbles_json = [{
+        'id': scrobble.id,
         'artist': scrobble.artist,
         'album': scrobble.album,
         'track': scrobble.track,
