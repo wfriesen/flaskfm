@@ -1,7 +1,9 @@
 #!flaskfm/bin/python
-from ago import human
+from datetime import datetime
 from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from humanize import naturaltime
+from psycopg2 import tz
 from sqlalchemy.sql import text
 
 from crossdomain import crossdomain
@@ -23,6 +25,7 @@ class Scrobble(db.Model):
 @app.route('/flaskfm/api/v0.1/recent', methods=['GET'])
 @crossdomain(origin='*')
 def recent_scrobbles():
+    now = datetime.now(tz=tz.FixedOffsetTimezone(offset=0, name=None))
     scrobbles = Scrobble.query.order_by(
         Scrobble.scrobble_timestamp.desc()
     ).limit(10)
@@ -32,7 +35,7 @@ def recent_scrobbles():
         'album': scrobble.album,
         'track': scrobble.track,
         'timestamp': scrobble.scrobble_timestamp,
-        'human_timestamp': human(scrobble.scrobble_timestamp)
+        'human_timestamp': naturaltime(now - scrobble.scrobble_timestamp)
     } for scrobble in scrobbles]
     return jsonify({'scrobbles': scrobbles_json})
 
