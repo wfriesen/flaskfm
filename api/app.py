@@ -1,4 +1,5 @@
 #!flaskfm/bin/python
+from ago import human
 from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import text
@@ -30,7 +31,8 @@ def recent_scrobbles():
         'artist': scrobble.artist,
         'album': scrobble.album,
         'track': scrobble.track,
-        'timestamp': scrobble.scrobble_timestamp
+        'timestamp': scrobble.scrobble_timestamp,
+        'human_timestamp': human(scrobble.scrobble_timestamp)
     } for scrobble in scrobbles]
     return jsonify({'scrobbles': scrobbles_json})
 
