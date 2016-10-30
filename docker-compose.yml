@@ -13,6 +13,8 @@ services:
     command: python /code/app.py
     ports:
       - 5000:5000
+    volumes:
+      - ./api:/code
     depends_on:
       - db
   web:
@@ -21,3 +23,5 @@ services:
       - 80:80
     volumes:
       - ./web:/usr/share/nginx/html
+    depends_on:
+      - api
