@@ -9,11 +9,31 @@ function show_artist_modal(id) {
 
     var albums = '';
     $.each(album_info, function() {
-      albums += '<div class="ui segment">' + this['album'] + ' (' + this['play_count'] + ' scrobbles since ' + this['first_scrobble'] + ')</div>'
+      albums +=
+        '<div class="ui segment">' +
+        '<a href="#" onclick="show_album_modal(' + id + ')">' + this['album'] + '</a> (' +
+        this['play_count'] + ' scrobbles since ' + this['first_scrobble'] + ')</div>'
     });
     $('#artistModalAlbums').html(albums);
 
     $('#artistModal').modal('show');
+  });
+};
+
+function show_album_modal(id) {
+  $.get('http://localhost:5000/flaskfm/api/v0.1/scrobble_album_info/' + id, function(data) {
+    var album_info = data['scrobble_album_info']['album_info'];
+    var track_list = data['scrobble_album_info']['tracks'];
+    $('#albumModalHeader').html('<a href="#" onclick="show_artist_modal(' + id + ')">' + album_info['artist'] + '</a> - ' + album_info['album']);
+    $('#albumModalInfo').html('Scrobbled ' + album_info['total_scrobbles'] + ' times since ' + album_info['first_scrobble'])
+
+    var tracks = '';
+    $.each(track_list, function() {
+      tracks += '<div class="ui segment">' + this['track'] + ' (' + this['play_count'] + ' scrobbles since ' + this['first_scrobble'] + ')</div>'
+    });
+    $('#albumModalTracks').html(tracks);
+
+    $('#albumModal').modal('show');
   });
 };
 
@@ -41,7 +61,8 @@ function get_recent_scrobbles() {
       html +=
         '<div class="ui segment" id="recent-scrobble-' + this.id + '">' +
         '<a href="#" onclick="show_artist_modal(' + this.id + ')">' + this.artist + '</a>' +
-        ' - ' + this.track + ' [' + this.album + ']' +
+        ' - ' + this.track + ' - ' +
+        '<a href="#" onclick="show_album_modal(' + this.id + ')">[' + this.album + ']</a>' +
         '<span title="' + this.timestamp + '"> (' + this.human_timestamp + ')</span>' +
         '<a href="#" onclick="remove_scrobble(' + this.id + ')"><i class="remove circle icon"></i></a>' +
         '</div>';

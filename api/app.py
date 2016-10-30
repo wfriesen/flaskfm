@@ -166,6 +166,63 @@ ORDER BY
 
 
 @app.route(
+    '/flaskfm/api/v0.1/scrobble_album_info/<int:scrobble_id>',
+    methods=['GET']
+)
+@crossdomain(origin='*')
+def scrobble_album_info(scrobble_id):
+    s = text("""SELECT
+  a.artist
+, a.album
+, COUNT(*) total_scrobbles
+, MIN(a.scrobble_timestamp) first_scrobble
+FROM scrobble s
+JOIN scrobble a
+  ON a.artist = s.artist
+  AND a.album = s.album
+WHERE s.id = :scrobble_id
+GROUP BY
+  a.artist
+, a.album""")
+
+    results = db.engine.execute(s, scrobble_id=scrobble_id)
+    album_info = [{
+        'artist': artist,
+        'album': album,
+        'total_scrobbles': total_scrobbles,
+        'first_scrobble': naturaldate(first_scrobble)
+    } for (artist, album, total_scrobbles, first_scrobble) in results][0]
+
+    s = text("""SELECT
+  a.track
+, COUNT(*) play_count
+, MIN(a.scrobble_timestamp) first_scrobble
+FROM scrobble s
+JOIN scrobble a
+  ON a.artist = s.artist
+  AND a.album = s.album
+WHERE s.id = :scrobble_id
+GROUP BY
+  a.track
+ORDER BY
+  play_count DESC""")
+
+    results = db.engine.execute(s, scrobble_id=scrobble_id)
+    tracks = [{
+        'track': track,
+        'play_count': play_count,
+        'first_scrobble': naturaldate(first_scrobble)
+    } for (track, play_count, first_scrobble) in results]
+
+    return jsonify({
+        'scrobble_album_info': {
+            'album_info': album_info,
+            'tracks': tracks
+        }
+    })
+
+
+@app.route(
     '/flaskfm/api/v0.1/top_artists_per_year/<int:year>',
     methods=['GET']
 )
