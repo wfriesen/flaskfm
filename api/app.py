@@ -72,7 +72,11 @@ def create_new_scrobble():
 
     db.session.add(new_scrobble)
     db.session.commit()
-    return jsonify({'last_scrobble': new_scrobble.album})
+    return jsonify({
+        'success': {
+            'message': 'Created new scrobble %s' % new_scrobble.id
+        }
+    })
 
 
 @app.route(
