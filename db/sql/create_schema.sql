@@ -1,7 +1,7 @@
 CREATE TABLE scrobble (
   id SERIAL PRIMARY KEY
 , artist TEXT NOT NULL
-, album TEXT NOT NULL
+, album TEXT
 , track TEXT NOT NULL
 , scrobble_timestamp TIMESTAMPTZ NOT NULL
 );
