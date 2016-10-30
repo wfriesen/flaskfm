@@ -1,3 +1,5 @@
+var last_scrobble, last_scrobble_poll;
+
 function remove_scrobble(id) {
   $.ajax({
     url: 'http://localhost:5000/flaskfm/api/v0.1/delete_scrobble/' + id,
@@ -6,6 +8,7 @@ function remove_scrobble(id) {
       $('#recent-scrobble-' + id).transition({
         animation: 'scale',
         onComplete: function() {
+          last_scrobble = undefined;
           get_recent_scrobbles();
           get_user_stats();
         }
@@ -32,7 +35,24 @@ function get_recent_scrobbles() {
 function get_user_stats() {
   $.get("http://localhost:5000/flaskfm/api/v0.1/user_stats", function(data) {
     html = '<p>' + data.stats.scrobble_count + ' scrobbles since ' + data.stats.first_scrobble + '</p>'
+    last_scrobble = data.stats.last_scrobble
+    restart_polling();
     $("#userstats").html(html);
+  });
+};
+
+function restart_polling() {
+  clearInterval(last_scrobble_poll);
+  last_scrobble_poll = setInterval(poll_for_last_scrobble, 5000);
+}
+
+function poll_for_last_scrobble() {
+  $.get('http://localhost:5000/flaskfm/api/v0.1/last_scrobble', function(data) {
+    if ( last_scrobble !== undefined && last_scrobble !== data.last_scrobble) {
+      get_recent_scrobbles();
+      get_user_stats();
+    }
+    last_scrobble = data.last_scrobble;
   });
 };
 

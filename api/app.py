@@ -1,6 +1,6 @@
 #!flaskfm/bin/python
 from datetime import datetime
-from flask import Flask, jsonify, request
+from flask import abort, Flask, jsonify, make_response, request
 from humanize import naturaldate, naturaltime
 from psycopg2 import tz
 from sqlalchemy import func
@@ -15,6 +15,18 @@ app.config['SQLALCHEMY_DATABASE_URI'] = database_uri
 db.init_app(app)
 
 
+def get_last_scrobble_timestamp():
+    last_scrobble_timestamp = db.session.query(
+        func.max(Scrobble.scrobble_timestamp)
+    ).scalar()
+    return last_scrobble_timestamp
+
+
+@app.errorhandler(400)
+def bad_request(error):
+    return make_response(jsonify({'error': 'Bad request data'}), 400)
+
+
 @app.route('/flaskfm/api/v0.1/user_stats', methods=['GET'])
 @crossdomain(origin='*')
 def user_stats():
@@ -22,14 +34,45 @@ def user_stats():
     first_scrobble = db.session.query(
         func.min(Scrobble.scrobble_timestamp)
     ).scalar()
+    last_scrobble = get_last_scrobble_timestamp()
     return jsonify(
         {
             'stats': {
                 'scrobble_count': scrobble_count,
-                'first_scrobble': naturaldate(first_scrobble)
+                'first_scrobble': naturaldate(first_scrobble),
+                'last_scrobble': last_scrobble
             }
         }
     )
+
+
+@app.route('/flaskfm/api/v0.1/last_scrobble', methods=['GET'])
+@crossdomain(origin='*')
+def last_scrobble():
+    last_scrobble = get_last_scrobble_timestamp()
+    return jsonify({'last_scrobble': last_scrobble})
+
+
+@app.route('/flaskfm/api/v0.1/create_new_scrobble', methods=['POST'])
+@crossdomain(origin='*')
+def create_new_scrobble():
+    if (
+        not request.json or
+        'artist' not in request.json or
+        'album' not in request.json or
+        'track' not in request.json
+    ):
+        abort(400)
+
+    new_scrobble = Scrobble(
+        artist=request.json['artist'],
+        album=request.json['album'],
+        track=request.json['track']
+    )
+
+    db.session.add(new_scrobble)
+    db.session.commit()
+    return jsonify({'last_scrobble': new_scrobble.album})
 
 
 @app.route(

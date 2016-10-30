@@ -1,9 +1,9 @@
 CREATE TABLE scrobble (
   id SERIAL PRIMARY KEY
-, artist TEXT
-, album TEXT
-, track TEXT
-, scrobble_timestamp TIMESTAMPTZ
+, artist TEXT NOT NULL
+, album TEXT NOT NULL
+, track TEXT NOT NULL
+, scrobble_timestamp TIMESTAMPTZ NOT NULL
 );
 
 COPY scrobble(artist, album, track, scrobble_timestamp) FROM '/dataimport/scrobbles.csv' DELIMITER ',' CSV;
