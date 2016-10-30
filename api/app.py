@@ -1,26 +1,18 @@
 #!flaskfm/bin/python
 from datetime import datetime
 from flask import Flask, jsonify, request
-from flask_sqlalchemy import SQLAlchemy
 from humanize import naturaldate, naturaltime
 from psycopg2 import tz
 from sqlalchemy import func
 from sqlalchemy.sql import text
 
 from crossdomain import crossdomain
+from models import db, Scrobble
 from secrets import database_uri
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = database_uri
-db = SQLAlchemy(app)
-
-
-class Scrobble(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    artist = db.Column(db.Text)
-    album = db.Column(db.Text)
-    track = db.Column(db.Text)
-    scrobble_timestamp = db.Column(db.DateTime(timezone=True))
+db.init_app(app)
 
 
 @app.route('/flaskfm/api/v0.1/user_stats', methods=['GET'])
