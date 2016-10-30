@@ -2,8 +2,9 @@
 from datetime import datetime
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
-from humanize import naturaltime
+from humanize import naturaldate, naturaltime
 from psycopg2 import tz
+from sqlalchemy import func
 from sqlalchemy.sql import text
 
 from crossdomain import crossdomain
@@ -20,6 +21,23 @@ class Scrobble(db.Model):
     album = db.Column(db.Text)
     track = db.Column(db.Text)
     scrobble_timestamp = db.Column(db.DateTime(timezone=True))
+
+
+@app.route('/flaskfm/api/v0.1/user_stats', methods=['GET'])
+@crossdomain(origin='*')
+def user_stats():
+    scrobble_count = Scrobble.query.count()
+    first_scrobble = db.session.query(
+        func.min(Scrobble.scrobble_timestamp)
+    ).scalar()
+    return jsonify(
+        {
+            'stats': {
+                'scrobble_count': scrobble_count,
+                'first_scrobble': naturaldate(first_scrobble)
+            }
+        }
+    )
 
 
 @app.route(

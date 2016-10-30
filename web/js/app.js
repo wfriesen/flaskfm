@@ -7,6 +7,7 @@ function remove_scrobble(id) {
         animation: 'scale',
         onComplete: function() {
           get_recent_scrobbles();
+          get_user_stats();
         }
       });
     }
@@ -28,6 +29,14 @@ function get_recent_scrobbles() {
   });
 };
 
+function get_user_stats() {
+  $.get("http://localhost:5000/flaskfm/api/v0.1/user_stats", function(data) {
+    html = '<p>' + data.stats.scrobble_count + ' scrobbles since ' + data.stats.first_scrobble + '</p>'
+    $("#userstats").html(html);
+  });
+};
+
 $(document).ready(function() {
   get_recent_scrobbles();
+  get_user_stats();
 });
