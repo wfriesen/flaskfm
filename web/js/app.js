@@ -1,5 +1,22 @@
 var last_scrobble, last_scrobble_poll;
 
+function show_artist_modal(id) {
+  $.get('http://localhost:5000/flaskfm/api/v0.1/scrobble_artist_info/' + id, function(data) {
+    var artist_info = data['scrobble_artist_info']['info'];
+    var album_info = data['scrobble_artist_info']['albums'];
+    $('#artistModalHeader').html(artist_info['artist']);
+    $('#artistModalInfo').html('Scrobbled ' + artist_info['total_scrobbles'] + ' times since ' + artist_info['first_scrobble']);
+
+    var albums = '';
+    $.each(album_info, function() {
+      albums += '<div class="ui segment">' + this['album'] + ' (' + this['play_count'] + ' scrobbles since ' + this['first_scrobble'] + ')</div>'
+    });
+    $('#artistModalAlbums').html(albums);
+
+    $('#artistModal').modal('show');
+  });
+};
+
 function remove_scrobble(id) {
   $.ajax({
     url: 'http://localhost:5000/flaskfm/api/v0.1/delete_scrobble/' + id,
@@ -23,7 +40,8 @@ function get_recent_scrobbles() {
     $.each(data.scrobbles, function(index, item) {
       html +=
         '<div class="ui segment" id="recent-scrobble-' + this.id + '">' +
-        this.artist + ' - ' + this.track + ' [' + this.album + ']' +
+        '<a href="#" onclick="show_artist_modal(' + this.id + ')">' + this.artist + '</a>' +
+        ' - ' + this.track + ' [' + this.album + ']' +
         '<span title="' + this.timestamp + '"> (' + this.human_timestamp + ')</span>' +
         '<a href="#" onclick="remove_scrobble(' + this.id + ')"><i class="remove circle icon"></i></a>' +
         '</div>';
