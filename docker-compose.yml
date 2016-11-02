@@ -10,7 +10,7 @@ services:
      - 5432:5432
   api:
     build: api
-    command: python /code/app.py
+    command: python /code/runserver.py
     ports:
       - 5000:5000
     volumes:

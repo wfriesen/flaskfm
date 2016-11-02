@@ -1,17 +1,12 @@
-#!flaskfm/bin/python
 from datetime import datetime
-from flask import abort, Flask, jsonify, make_response, request
+from flask import abort, jsonify, make_response, request
 from humanize import naturaldate, naturaltime
 from psycopg2 import tz
 from flask_sqlalchemy import sqlalchemy
 
 from crossdomain import crossdomain
 from models import db, Scrobbles, Artists, Albums, Tracks
-from secrets import database_uri
-
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = database_uri
-db.init_app(app)
+from flaskfm import app
 
 
 def get_last_scrobble_timestamp():
@@ -215,6 +210,3 @@ def scrobble_track_info(scrobble_id):
     }
 
     return jsonify({'scrobble_track_info': {'track_info': track_info}})
-
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')

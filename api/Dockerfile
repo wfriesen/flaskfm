@@ -3,5 +3,5 @@ ENV PYTHONUNBUFFERED 1
 RUN mkdir /code
 ADD . /code
 WORKDIR /code
-RUN pip install --upgrade -r requirements.txt
+RUN pip install --upgrade -r flaskfm/requirements.txt
 EXPOSE 5000
