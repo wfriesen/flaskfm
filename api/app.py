@@ -3,8 +3,7 @@ from datetime import datetime
 from flask import abort, Flask, jsonify, make_response, request
 from humanize import naturaldate, naturaltime
 from psycopg2 import tz
-from sqlalchemy import func
-from sqlalchemy.sql import text
+from flask_sqlalchemy import sqlalchemy
 
 from crossdomain import crossdomain
 from models import db, Scrobble
@@ -17,7 +16,7 @@ db.init_app(app)
 
 def get_last_scrobble_timestamp():
     last_scrobble_timestamp = db.session.query(
-        func.max(Scrobble.scrobble_timestamp)
+        sqlalchemy.func.max(Scrobble.scrobble_timestamp)
     ).scalar()
     return last_scrobble_timestamp
 
@@ -32,7 +31,7 @@ def bad_request(error):
 def user_stats():
     scrobble_count = Scrobble.query.count()
     first_scrobble = db.session.query(
-        func.min(Scrobble.scrobble_timestamp)
+        sqlalchemy.func.min(Scrobble.scrobble_timestamp)
     ).scalar()
     last_scrobble = get_last_scrobble_timestamp()
     return jsonify(
@@ -120,7 +119,7 @@ def recent_scrobbles():
 )
 @crossdomain(origin='*')
 def scrobble_artist_info(scrobble_id):
-    s = text("""SELECT
+    s = sqlalchemy.text("""SELECT
   MIN(a.artist) artist
 , MIN(a.scrobble_timestamp) first_scrobble
 , COUNT(*) total_scrobbles
@@ -137,7 +136,7 @@ WHERE s.id = :scrobble_id""")
         'first_scrobble': naturaldate(first_scrobble)
     } for (artist, first_scrobble, total_scrobbles) in results]
 
-    s = text("""
+    s = sqlalchemy.text("""
 SELECT
   a.album
 , COUNT(*) play_count
@@ -177,7 +176,7 @@ ORDER BY
 )
 @crossdomain(origin='*')
 def scrobble_album_info(scrobble_id):
-    s = text("""SELECT
+    s = sqlalchemy.text("""SELECT
   a.artist
 , a.album
 , COUNT(*) total_scrobbles
@@ -199,7 +198,7 @@ GROUP BY
         'first_scrobble': naturaldate(first_scrobble)
     } for (artist, album, total_scrobbles, first_scrobble) in results][0]
 
-    s = text("""SELECT
+    s = sqlalchemy.text("""SELECT
   a.track
 , COUNT(*) play_count
 , MIN(a.scrobble_timestamp) first_scrobble
@@ -236,7 +235,7 @@ ORDER BY
 )
 @crossdomain(origin='*')
 def scrobble_track_info(scrobble_id):
-    s = text("""SELECT
+    s = sqlalchemy.text("""SELECT
   t.artist
 , t.album
 , t.track
@@ -270,7 +269,7 @@ GROUP BY
     methods=['GET']
 )
 def top_artists_per_year(year):
-    s = text("""SELECT
+    s = sqlalchemy.text("""SELECT
   year
 , artist
 , play_count
