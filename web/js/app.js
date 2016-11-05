@@ -1,7 +1,7 @@
 var last_scrobble, last_scrobble_poll;
 
 function show_artist_modal(id) {
-  $.get('http://localhost:5000/flaskfm/api/v0.1/scrobble_artist_info/' + id, function(data) {
+  $.get('/api/v0.1/scrobble_artist_info/' + id, function(data) {
     var artist_info = data['scrobble_artist_info']['info'];
     var album_info = data['scrobble_artist_info']['albums'];
     $('#artistModalHeader').html(artist_info['artist']);
@@ -21,7 +21,7 @@ function show_artist_modal(id) {
 };
 
 function show_album_modal(id) {
-  $.get('http://localhost:5000/flaskfm/api/v0.1/scrobble_album_info/' + id, function(data) {
+  $.get('/api/v0.1/scrobble_album_info/' + id, function(data) {
     var album_info = data['scrobble_album_info']['album_info'];
     var track_list = data['scrobble_album_info']['tracks'];
     $('#albumModalHeader').html('<a href="#" onclick="show_artist_modal(' + id + ')">' + album_info['artist'] + '</a> - ' + album_info['album']);
@@ -40,7 +40,7 @@ function show_album_modal(id) {
 };
 
 function show_track_modal(id) {
-  $.get('http://localhost:5000/flaskfm/api/v0.1/scrobble_track_info/' + id, function(data) {
+  $.get('/api/v0.1/scrobble_track_info/' + id, function(data) {
     var track_info = data['scrobble_track_info']['track_info'];
     $('#trackModalHeader').html(
       '<a href="#" onclick="show_artist_modal(' + id + ')">' + track_info['artist'] + '</a> - ' + track_info['track'] +
@@ -54,7 +54,7 @@ function show_track_modal(id) {
 
 function remove_scrobble(id) {
   $.ajax({
-    url: 'http://localhost:5000/flaskfm/api/v0.1/delete_scrobble/' + id,
+    url: '/api/v0.1/delete_scrobble/' + id,
     type: 'DELETE',
     success: function(response) {
       $('#recent-scrobble-' + id).transition({
@@ -70,7 +70,7 @@ function remove_scrobble(id) {
 };
 
 function get_recent_scrobbles() {
-  $.get("http://localhost:5000/flaskfm/api/v0.1/recent", function(data) {
+  $.get("/api/v0.1/recent", function(data) {
     var html = '';
     $.each(data.scrobbles, function(index, item) {
       html +=
@@ -87,7 +87,7 @@ function get_recent_scrobbles() {
 };
 
 function get_user_stats() {
-  $.get("http://localhost:5000/flaskfm/api/v0.1/user_stats", function(data) {
+  $.get("/api/v0.1/user_stats", function(data) {
     html = '<p>' + data.stats.scrobble_count + ' scrobbles since ' + data.stats.first_scrobble + '</p>'
     last_scrobble = data.stats.last_scrobble
     restart_polling();
@@ -101,7 +101,7 @@ function restart_polling() {
 }
 
 function poll_for_last_scrobble() {
-  $.get('http://localhost:5000/flaskfm/api/v0.1/last_scrobble', function(data) {
+  $.get('/api/v0.1/last_scrobble', function(data) {
     if ( last_scrobble !== undefined && last_scrobble !== data.last_scrobble) {
       get_recent_scrobbles();
       get_user_stats();

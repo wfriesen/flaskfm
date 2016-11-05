@@ -17,9 +17,9 @@ services:
     depends_on:
       - db
   web:
-    image: nginx
+    build: web
     ports:
-      - 80:80
+      - 8000:80
     volumes:
       - ./web:/usr/share/nginx/html
     depends_on:

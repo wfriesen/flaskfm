@@ -4,7 +4,6 @@ from humanize import naturaldate, naturaltime
 from psycopg2 import tz
 from flask_sqlalchemy import sqlalchemy
 
-from crossdomain import crossdomain
 from models import db, Scrobbles, Artists, Albums, Tracks
 from flaskfm import app
 
@@ -21,8 +20,7 @@ def bad_request(error):
     return make_response(jsonify({'error': 'Bad request data'}), 400)
 
 
-@app.route('/flaskfm/api/v0.1/user_stats', methods=['GET'])
-@crossdomain(origin='*')
+@app.route('/api/v0.1/user_stats', methods=['GET'])
 def user_stats():
     scrobble_count = Scrobbles.query.count()
     first_scrobble = db.session.query(
@@ -40,15 +38,13 @@ def user_stats():
     )
 
 
-@app.route('/flaskfm/api/v0.1/last_scrobble', methods=['GET'])
-@crossdomain(origin='*')
+@app.route('/api/v0.1/last_scrobble', methods=['GET'])
 def last_scrobble():
     last_scrobble = get_last_scrobble_timestamp()
     return jsonify({'last_scrobble': last_scrobble})
 
 
-@app.route('/flaskfm/api/v0.1/create_new_scrobble', methods=['POST'])
-@crossdomain(origin='*')
+@app.route('/api/v0.1/create_new_scrobble', methods=['POST'])
 def create_new_scrobble():
     if (
         not request.json or
@@ -82,10 +78,9 @@ def create_new_scrobble():
 
 
 @app.route(
-    '/flaskfm/api/v0.1/delete_scrobble/<int:id>',
+    '/api/v0.1/delete_scrobble/<int:id>',
     methods=['DELETE', 'OPTIONS']
 )
-@crossdomain(origin='*')
 def delete_scrobble(id):
     if request.method == 'OPTIONS':
         return jsonify({'response': 'All good'})
@@ -98,8 +93,7 @@ def delete_scrobble(id):
     return jsonify({'success': {'message': 'Deleted scrobble ID: %d' % (id)}})
 
 
-@app.route('/flaskfm/api/v0.1/recent', methods=['GET'])
-@crossdomain(origin='*')
+@app.route('/api/v0.1/recent', methods=['GET'])
 def recent_scrobbles():
     now = datetime.now(tz=tz.FixedOffsetTimezone(offset=0, name=None))
     scrobbles = Scrobbles.query.order_by(
@@ -117,10 +111,9 @@ def recent_scrobbles():
 
 
 @app.route(
-    '/flaskfm/api/v0.1/scrobble_artist_info/<int:scrobble_id>',
+    '/api/v0.1/scrobble_artist_info/<int:scrobble_id>',
     methods=['GET']
 )
-@crossdomain(origin='*')
 def scrobble_artist_info(scrobble_id):
     artist = Scrobbles.query.get(scrobble_id).artist
 
@@ -150,10 +143,9 @@ def scrobble_artist_info(scrobble_id):
 
 
 @app.route(
-    '/flaskfm/api/v0.1/scrobble_album_info/<int:scrobble_id>',
+    '/api/v0.1/scrobble_album_info/<int:scrobble_id>',
     methods=['GET']
 )
-@crossdomain(origin='*')
 def scrobble_album_info(scrobble_id):
     album = Scrobbles.query.get(scrobble_id).album
     first_scrobble = db.session.query(
@@ -191,10 +183,9 @@ def scrobble_album_info(scrobble_id):
 
 
 @app.route(
-    '/flaskfm/api/v0.1/scrobble_track_info/<int:scrobble_id>',
+    '/api/v0.1/scrobble_track_info/<int:scrobble_id>',
     methods=['GET']
 )
-@crossdomain(origin='*')
 def scrobble_track_info(scrobble_id):
     track = Scrobbles.query.get(scrobble_id).track
     first_scrobble = db.session.query(
