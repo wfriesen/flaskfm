@@ -3,13 +3,12 @@ version: '2'
 services:
   db:
     build: db
-    environment:
-      POSTGRES_PASSWORD: docker
-      POSTGRES_USER: docker
+    env_file: env.env
     ports:
      - 5432:5432
   api:
     build: api
+    env_file: env.env
     command: python /code/runserver.py
     ports:
       - 5000:5000
