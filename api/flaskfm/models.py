@@ -33,56 +33,57 @@ class Scrobbles(db.Model):
         }
 
 
-def json(model, url_handler, **kwargs):
-    return {
-        'url': url_for(url_handler, **kwargs),
-        'name': model.name,
-        'first_scrobble': naturaldate(min(
-            scrobble.scrobble_timestamp for scrobble in model.scrobbles
-        )),
-        'scrobbles': len(model.scrobbles)
-    }
-
-
-class Artists(db.Model):
+class Base():
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text)
 
     def __init__(self, name):
         self.name = name
 
+    def json(self, url_handler, **kwargs):
+        return {
+            'url': url_for(url_handler, **kwargs),
+            'name': self.name,
+            'first_scrobble': naturaldate(min(
+                scrobble.scrobble_timestamp for scrobble in self.scrobbles
+            )),
+            'scrobbles': len(self.scrobbles)
+        }
+
+
+class Artists(db.Model, Base):
+
+    def __init__(self, name):
+        super(Artists, self).__init__(self, name)
+
     def json(self):
-        return json(self, 'artist', artist_id=self.id)
+        return super(Artists, self).json('artist', artist_id=self.id)
 
 
-class Albums(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+class Albums(db.Model, Base):
     artist_id = db.Column(db.Integer, db.ForeignKey('artists.id'))
-    name = db.Column(db.Text)
 
     artist = db.relationship('Artists', backref='albums')
 
     def __init__(self, name, artist):
-        self.name = name
+        super(Albums, self).__init__(self, name)
         self.artist = artist
 
     def json(self):
-        return json(self, 'album', album_id=self.id)
+        return super(Albums, self).json('album', album_id=self.id)
 
 
-class Tracks(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+class Tracks(db.Model, Base):
     artist_id = db.Column(db.Integer, db.ForeignKey('artists.id'))
     album_id = db.Column(db.Integer, db.ForeignKey('albums.id'))
-    name = db.Column(db.Text)
 
     artist = db.relationship('Artists', backref='tracks')
     album = db.relationship('Albums', backref='tracks')
 
     def __init__(self, name, artist, album):
-        self.name = name
+        super(Tracks, self).__init__(self, name)
         self.artist = artist
         self.album = album
 
     def json(self):
-        return json(self, 'track', track_id=self.id)
+        return super(Tracks, self).json('track', track_id=self.id)
