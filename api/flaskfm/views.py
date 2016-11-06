@@ -94,7 +94,7 @@ def create_scrobble():
 
 
 @app.route('/api/v0.1/scrobble/<int:scrobble_id>', methods=['DELETE'])
-def delete_scrobble(scrobble_id):
+def scrobble(scrobble_id):
     scrobble = Scrobbles.query.filter_by(id=scrobble_id)
     scrobble.delete()
     db.session.commit()
