@@ -1,5 +1,7 @@
 from datetime import datetime
+from flask import url_for
 from flask_sqlalchemy import SQLAlchemy
+from humanize import naturaldate
 
 db = SQLAlchemy()
 
@@ -21,6 +23,26 @@ class Scrobbles(db.Model):
         self.track = track
         self.scrobble_timestamp = datetime.now()
 
+    def json(self):
+        return {
+            'url': url_for('scrobble', scrobble_id=self.id),
+            'scrobble_timestamp': self.scrobble_timestamp,
+            'artist': self.artist.json(),
+            'album': self.album.json(),
+            'track': self.track.json()
+        }
+
+
+def json(model, url_handler, **kwargs):
+    return {
+        'url': url_for(url_handler, **kwargs),
+        'name': model.name,
+        'first_scrobble': naturaldate(min(
+            scrobble.scrobble_timestamp for scrobble in model.scrobbles
+        )),
+        'scrobbles': len(model.scrobbles)
+    }
+
 
 class Artists(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -28,6 +50,9 @@ class Artists(db.Model):
 
     def __init__(self, name):
         self.name = name
+
+    def json(self):
+        return json(self, 'artist', artist_id=self.id)
 
 
 class Albums(db.Model):
@@ -40,6 +65,9 @@ class Albums(db.Model):
     def __init__(self, name, artist):
         self.name = name
         self.artist = artist
+
+    def json(self):
+        return json(self, 'album', album_id=self.id)
 
 
 class Tracks(db.Model):
@@ -55,3 +83,6 @@ class Tracks(db.Model):
         self.name = name
         self.artist = artist
         self.album = album
+
+    def json(self):
+        return json(self, 'track', track_id=self.id)

@@ -1,18 +1,19 @@
 var last_scrobble, last_scrobble_poll;
 
-function show_artist_modal(id) {
-  $.get('/api/v0.1/scrobble_artist_info/' + id, function(data) {
-    var artist_info = data['scrobble_artist_info']['info'];
-    var album_info = data['scrobble_artist_info']['albums'];
-    $('#artistModalHeader').html(artist_info['artist']);
-    $('#artistModalInfo').html('Scrobbled ' + artist_info['total_scrobbles'] + ' times since ' + artist_info['first_scrobble']);
+function scrobbled_since_text(object) {
+  return object.scrobbles + ' scrobbles since ' + object.first_scrobble;
+}
+
+function show_artist_modal(url) {
+  $.get(url, function(data) {
+    $('#artistModalHeader').html(data.artist.name);
+    $('#artistModalInfo').html(scrobbled_since_text(data.artist));
 
     var albums = '';
-    $.each(album_info, function() {
+    $.each(data.artist.albums, function(i, album) {
       albums +=
         '<div class="ui segment">' +
-        '<a href="#" onclick="show_album_modal(' + this['last_scrobble_id'] + ')">' + this['album'] + '</a> (' +
-        this['play_count'] + ' scrobbles since ' + this['first_scrobble'] + ')</div>'
+        '<a href="#" onclick="show_album_modal(\'' + album.url + '\')">' + album.name + '</a> ' + scrobbled_since_text(album) + '</div>';
     });
     $('#artistModalAlbums').html(albums);
 
@@ -20,18 +21,15 @@ function show_artist_modal(id) {
   });
 };
 
-function show_album_modal(id) {
-  $.get('/api/v0.1/scrobble_album_info/' + id, function(data) {
-    var album_info = data['scrobble_album_info']['album_info'];
-    var track_list = data['scrobble_album_info']['tracks'];
-    $('#albumModalHeader').html('<a href="#" onclick="show_artist_modal(' + id + ')">' + album_info['artist'] + '</a> - ' + album_info['album']);
-    $('#albumModalInfo').html('Scrobbled ' + album_info['total_scrobbles'] + ' times since ' + album_info['first_scrobble'])
+function show_album_modal(url) {
+  $.get(url, function(data) {
+    $('#albumModalHeader').html('<a href="#" onclick="show_artist_modal(\'' + data.album.artist.url + '\')">' + data.album.artist.name + '</a> - ' + data.album.name);
+    $('#albumModalInfo').html(scrobbled_since_text(data.album));
 
     var tracks = '';
-    $.each(track_list, function() {
+    $.each(data.album.tracks, function(i, track) {
       tracks += '<div class="ui segment">' +
-      '<a href="#" onclick="show_track_modal(' + this['last_scrobble_id'] + ')">' + this['track'] + '</a> (' + this['play_count'] + ' scrobbles since ' + this['first_scrobble'] +
-      ')</div>'
+      '<a href="#" onclick="show_track_modal(\'' + track.url + '\')">' + track.name + '</a> (' + scrobbled_since_text(track) + ')</div>';
     });
     $('#albumModalTracks').html(tracks);
 
@@ -39,50 +37,31 @@ function show_album_modal(id) {
   });
 };
 
-function show_track_modal(id) {
-  $.get('/api/v0.1/scrobble_track_info/' + id, function(data) {
-    var track_info = data['scrobble_track_info']['track_info'];
+function show_track_modal(url) {
+  $.get(url, function(data) {
     $('#trackModalHeader').html(
-      '<a href="#" onclick="show_artist_modal(' + id + ')">' + track_info['artist'] + '</a> - ' + track_info['track'] +
-      ' <a href="#" onclick="show_album_modal(' + id + ')">[' + track_info['album'] + ']</a>'
+      '<a href="#" onclick="show_artist_modal(\'' + data.track.artist.url + '\')">' + data.track.artist.name + '</a> - ' + data.track.name + ' ' +
+      '<a href="#" onclick="show_album_modal(\'' + data.track.album.url + '\')">[' + data.track.album.name + ']</a>'
     );
-    $('#trackModalInfo').html('Scrobbled ' + track_info['total_scrobbles'] + ' times since ' + track_info['first_scrobble']);
+    $('#trackModalInfo').html(scrobbled_since_text(data.track));
 
     $('#trackModal').modal('show');
   });
 };
 
-function remove_scrobble(id) {
+function remove_scrobble(url) {
   $.ajax({
-    url: '/api/v0.1/delete_scrobble/' + id,
+    url: url,
     type: 'DELETE',
     success: function(response) {
-      $('#recent-scrobble-' + id).transition({
+      $('div[data-scrobble-url="' + url + '"]').transition({
         animation: 'scale',
         onComplete: function() {
           last_scrobble = undefined;
-          get_recent_scrobbles();
           get_user_stats();
         }
       });
     }
-  });
-};
-
-function get_recent_scrobbles() {
-  $.get("/api/v0.1/recent", function(data) {
-    var html = '';
-    $.each(data.scrobbles, function(index, item) {
-      html +=
-        '<div class="ui segment" id="recent-scrobble-' + this.id + '">' +
-        '<a href="#" onclick="show_artist_modal(' + this.id + ')">' + this.artist + '</a>' +
-        ' - <a href="#" onclick="show_track_modal(' + this.id + ')">' + this.track + '</a> - ' +
-        '<a href="#" onclick="show_album_modal(' + this.id + ')">[' + this.album + ']</a>' +
-        '<span title="' + this.timestamp + '"> (' + this.human_timestamp + ')</span>' +
-        '<a href="#" onclick="remove_scrobble(' + this.id + ')"><i class="remove circle icon"></i></a>' +
-        '</div>';
-    });
-    $("#recentscrobbles").html(html);
   });
 };
 
@@ -92,25 +71,34 @@ function get_user_stats() {
     last_scrobble = data.stats.last_scrobble
     restart_polling();
     $("#userstats").html(html);
+
+    html = '';
+    $.each(data.stats.last_ten_scrobbles, function(index, item) {
+      html +=
+        '<div class="ui segment" data-scrobble-url="' + item.url + '">' +
+        '<a href="#" onclick="show_artist_modal(\'' + item.artist.url + '\')">' + item.artist.name + '</a>' +
+        ' - <a href="#" onclick="show_track_modal(\'' + item.track.url + '\')">' + item.track.name + '</a> - ' +
+        '<a href="#" onclick="show_album_modal(\'' + item.album.url + '\')">[' + item.album.name + ']</a>' +
+        '<span title="' + item.scrobble_timestamp + '"> (' + item.scrobble_timestamp + ')</span>' +
+        '<a href="#" onclick="remove_scrobble(\'' + item.url + '\')"><i class="remove circle icon"></i></a>' +
+        '</div>';
+    });
+    $('#recentscrobbles').html(html);
   });
 };
 
 function restart_polling() {
   clearInterval(last_scrobble_poll);
-  last_scrobble_poll = setInterval(poll_for_last_scrobble, 5000);
+  last_scrobble_poll = setInterval(function() {
+    $.get('/api/v0.1/last_scrobble', function(data) {
+      if ( last_scrobble !== undefined && last_scrobble !== data.last_scrobble) {
+        get_user_stats();
+      }
+      last_scrobble = data.last_scrobble;
+    });
+  }, 5000);
 }
 
-function poll_for_last_scrobble() {
-  $.get('/api/v0.1/last_scrobble', function(data) {
-    if ( last_scrobble !== undefined && last_scrobble !== data.last_scrobble) {
-      get_recent_scrobbles();
-      get_user_stats();
-    }
-    last_scrobble = data.last_scrobble;
-  });
-};
-
 $(document).ready(function() {
-  get_recent_scrobbles();
   get_user_stats();
 });
