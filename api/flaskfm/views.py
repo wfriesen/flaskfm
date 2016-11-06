@@ -64,7 +64,7 @@ def create_new_scrobble():
 
     track = Tracks.query.filter_by(name=request.json['track']).first()
     if track is None:
-        track = Tracks(name=request.json['track'], artist=artist, track=track)
+        track = Tracks(name=request.json['track'], artist=artist, album=album)
 
     new_scrobble = Scrobbles(artist=artist, album=album, track=track)
 
