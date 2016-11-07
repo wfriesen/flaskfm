@@ -73,11 +73,9 @@ def track(track_id):
 
 @app.route('/api/v0.1/scrobble', methods=['POST'])
 def create_scrobble():
-    if (
-        not request.json or
-        'artist' not in request.json or
-        'album' not in request.json or
-        'track' not in request.json
+    if not (
+        request.json and
+        all(k in request.json for k in ('artist', 'album', 'track'))
     ):
         abort(400)
 
