@@ -11,6 +11,11 @@ def bad_request(error):
     return make_response(jsonify({'error': 'Bad request data'}), 400)
 
 
+@app.errorhandler(404)
+def not_found(error):
+    return make_response(jsonify({'error': 'Not found'}), 404)
+
+
 @app.route('/api/v0.1/user_stats', methods=['GET'])
 def user_stats():
     last_ten_scrobbles = Scrobbles.query.order_by(
@@ -37,6 +42,8 @@ def user_stats():
 @app.route('/api/v0.1/artist/<int:artist_id>', methods=['GET'])
 def artist(artist_id):
     artist = Artists.query.get(artist_id)
+    if artist is None:
+        abort(404)
     artist_json = artist.json()
     artist_json['albums'] = [album.json() for album in artist.albums]
     return jsonify({'artist': artist_json})
@@ -45,6 +52,8 @@ def artist(artist_id):
 @app.route('/api/v0.1/album/<int:album_id>', methods=['GET'])
 def album(album_id):
     album = Albums.query.get(album_id)
+    if album is None:
+        abort(404)
     album_json = album.json()
     album_json['tracks'] = [track.json() for track in album.tracks]
     album_json['artist'] = album.artist.json()
@@ -54,6 +63,8 @@ def album(album_id):
 @app.route('/api/v0.1/track/<int:track_id>', methods=['GET'])
 def track(track_id):
     track = Tracks.query.get(track_id)
+    if track is None:
+        abort(404)
     track_json = track.json()
     track_json['album'] = track.album.json()
     track_json['artist'] = track.artist.json()
@@ -96,6 +107,8 @@ def create_scrobble():
 @app.route('/api/v0.1/scrobble/<int:scrobble_id>', methods=['DELETE'])
 def scrobble(scrobble_id):
     scrobble = Scrobbles.query.get(scrobble_id)
+    if scrobble is None:
+        abort(404)
     db.session.delete(scrobble)
     db.session.commit()
     return jsonify({
