@@ -95,8 +95,8 @@ def create_scrobble():
 
 @app.route('/api/v0.1/scrobble/<int:scrobble_id>', methods=['DELETE'])
 def scrobble(scrobble_id):
-    scrobble = Scrobbles.query.filter_by(id=scrobble_id)
-    scrobble.delete()
+    scrobble = Scrobbles.query.get(scrobble_id)
+    db.session.delete(scrobble)
     db.session.commit()
     return jsonify({
         'success': {
