@@ -51,7 +51,7 @@ class Base():
         }
 
 
-class Artists(db.Model, Base):
+class Artists(Base, db.Model):
 
     def __init__(self, name):
         super(Artists, self).__init__(self, name)
@@ -60,7 +60,7 @@ class Artists(db.Model, Base):
         return super(Artists, self).json('artist', artist_id=self.id)
 
 
-class Albums(db.Model, Base):
+class Albums(Base, db.Model):
     artist_id = db.Column(db.Integer, db.ForeignKey('artists.id'))
 
     artist = db.relationship('Artists', backref='albums')
@@ -73,7 +73,7 @@ class Albums(db.Model, Base):
         return super(Albums, self).json('album', album_id=self.id)
 
 
-class Tracks(db.Model, Base):
+class Tracks(Base, db.Model):
     artist_id = db.Column(db.Integer, db.ForeignKey('artists.id'))
     album_id = db.Column(db.Integer, db.ForeignKey('albums.id'))
 
