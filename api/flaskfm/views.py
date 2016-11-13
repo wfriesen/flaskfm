@@ -79,16 +79,26 @@ def create_scrobble():
     ):
         abort(400)
 
-    artist = Artists.query.filter_by(name=request.json['artist']).first()
-    if artist is None:
+    try:
+        artist = Artists.query.filter_by(name=request.json['artist']).one()
+    except sqlalchemy.orm.exc.NoResultFound:
         artist = Artists(name=request.json['artist'])
 
-    album = Albums.query.filter_by(name=request.json['album']).first()
-    if album is None:
+    try:
+        album = Albums.query.filter_by(
+            name=request.json['album'],
+            artist_id=artist.id
+        ).one()
+    except sqlalchemy.orm.exc.NoResultFound:
         album = Albums(name=request.json['album'], artist=artist)
 
-    track = Tracks.query.filter_by(name=request.json['track']).first()
-    if track is None:
+    try:
+        track = Tracks.query.filter_by(
+            name=request.json['track'],
+            artist_id=artist.id,
+            album_id=album.id
+        ).one()
+    except sqlalchemy.orm.exc.NoResultFound:
         track = Tracks(name=request.json['track'], artist=artist, album=album)
 
     new_scrobble = Scrobbles(artist=artist, album=album, track=track)
