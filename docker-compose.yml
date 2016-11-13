@@ -16,6 +16,7 @@ services:
       - ./api:/code
     depends_on:
       - db
+    entrypoint: ./wait-for-it.sh db:5432 --
   web:
     build: web
     ports:

@@ -10,3 +10,4 @@ A last.fm clone using [Flask](http://flask.pocoo.org/)
 FlaskFM makes use of the following projects (among others):
 - [Flask](http://flask.pocoo.org/)
 - [Flask-SQLAlchemy](http://flask-sqlalchemy.pocoo.org/)
+- [wait-for-it](https://github.com/vishnubob/wait-for-it)
