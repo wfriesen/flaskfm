@@ -1,6 +1,6 @@
 import glob
 import taglib
-from subprocess import check_output
+from subprocess import check_output, CalledProcessError
 
 AUDIO_PATH = '/volume/files/'
 OUTPUT_PATH = '/volume/output/'
@@ -34,6 +34,7 @@ def write_pitches(id, filename):
         for time, pitch in get_pitches(filename):
             o.write(','.join([str(id), time, pitch]) + '\n')
 
+processing_errors = False
 with open(OUTPUT_PATH + 'files.csv', 'w') as o:
     for i, audio_file in enumerate(get_files(), 1):
         print('Processing file ' + str(i) + ': ' + audio_file)
@@ -49,5 +50,14 @@ with open(OUTPUT_PATH + 'files.csv', 'w') as o:
         values = [str(i), '"' + filename + '"'] + values
         csv_line = ','.join(values)
         o.write(csv_line + '\n')
-        write_onsets(i, AUDIO_PATH + filename)
-        write_pitches(i, AUDIO_PATH + filename)
+        try:
+            write_onsets(i, AUDIO_PATH + filename)
+            write_pitches(i, AUDIO_PATH + filename)
+        except CalledProcessError as error:
+            processing_errors = True
+            print('Error processing file: ' + filename)
+            with open(OUTPUT_PATH + 'errors.log', 'a') as e:
+                e.write(filename + '\n')
+
+if processing_errors:
+    print('Errors occurred while processing some files. See output/errors.log')
