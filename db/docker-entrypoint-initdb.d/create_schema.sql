@@ -24,11 +24,11 @@ CREATE TABLE pitch (
 , pitch NUMERIC
 );
 
-COPY sample_data(artist, album, track, scrobble_timestamp) FROM '/dataimport/scrobbles.csv' DELIMITER ',' CSV;
+COPY sample_data(artist, album, track, scrobble_timestamp) FROM '/audio_data/scrobbles.csv' DELIMITER ',' CSV;
 
-COPY files(id, name, artist_name, album_name, track_name) FROM '/dataimport/files.csv' DELIMITER ',' CSV;
+COPY files(id, name, artist_name, album_name, track_name) FROM '/audio_data/files.csv' DELIMITER ',' CSV;
 
-COPY onsets(file_id, onset) FROM '/dataimport/onsets.csv' DELIMITER ',' CSV;
+COPY onsets(file_id, onset) FROM '/audio_data/onsets.csv' DELIMITER ',' CSV;
 
 DO $$DECLARE
   file RECORD;
@@ -65,7 +65,7 @@ CREATE TRIGGER trg_pitch_insert
   BEFORE INSERT ON pitch
   FOR EACH ROW EXECUTE PROCEDURE pitch_insert();
 
-COPY pitch(file_id, time, pitch) FROM '/dataimport/pitch.csv' DELIMITER ',' CSV;
+COPY pitch(file_id, time, pitch) FROM '/audio_data/pitch.csv' DELIMITER ',' CSV;
 
 CREATE OR REPLACE FUNCTION import_sample_data()
 RETURNS void AS $$
