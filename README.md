@@ -3,7 +3,7 @@
 A last.fm clone using [Flask](http://flask.pocoo.org/)
 
 ## Usage
-- Use [Last.fm to csv](https://benjaminbenben.com/lastfm-to-csv/) to get a CSV of your (or any users) scrobbles and save it as `db/scrobbles.csv`.
+- Use [Last.fm to csv](https://benjaminbenben.com/lastfm-to-csv/) to get a CSV of your (or any users) scrobbles and save it as `db/audio_data/scrobbles.csv`.
 - Analyze some audio files that you have scrobbled. From within the `scripts` directory:
   - Build the docker image with `docker build -t audioscripts .`
   - Run the actual processing with `docker run -v CODE_DIRECTORY/flaskfm/db/audio_data:/volume/output -v MUSIC_DIRECTORY:/volume/files -it audioscripts`, replacing `CODE_DIRECTORY` with wherever you have cloned this repository, and `MUSIC_DIRECTORY` with the location of some (properly tagged) .mp3 and/or .flac files. These must be absolute paths.
