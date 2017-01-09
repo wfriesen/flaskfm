@@ -9,6 +9,7 @@ services:
     volumes:
       - ./db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
       - ./db/audio_data:/audio_data
+      - ./db/postgres_data:/var/lib/postgresql/data
   api:
     build: api
     env_file: env.env
