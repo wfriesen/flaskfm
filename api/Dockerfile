@@ -1,7 +1,6 @@
 FROM python:2.7.13-alpine
 ENV PYTHONUNBUFFERED 1
-RUN mkdir /code
-ADD . /code
+ADD ./src /code
 WORKDIR /code
 RUN apk add --no-cache \
     bash \
