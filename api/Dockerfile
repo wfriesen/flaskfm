@@ -3,11 +3,12 @@ ENV PYTHONUNBUFFERED 1
 RUN mkdir /code
 ADD . /code
 WORKDIR /code
-RUN apk update && \
-  apk add --no-cache \
-  gcc \
-  musl-dev \
-  postgresql-dev \
-  bash
-RUN pip install --upgrade -r flaskfm/requirements.txt
+RUN apk add --no-cache \
+    bash \
+    postgresql-dev \
+  && apk add --no-cache --virtual .build-deps \
+    gcc \
+    musl-dev \
+  && pip install --upgrade -r flaskfm/requirements.txt \
+  && apk del .build-deps
 EXPOSE 5000
