@@ -2,7 +2,7 @@ version: '2'
 
 services:
   db:
-    image: postgres
+    image: postgres:9.6.1-alpine
     env_file: env.env
     ports:
      - 5432:5432
@@ -22,7 +22,7 @@ services:
       - db
     entrypoint: ./wait-for-it.sh db:5432 --
   web:
-    image: nginx
+    image: nginx:1.11.8-alpine
     ports:
       - 8000:80
     volumes:
